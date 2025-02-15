@@ -3,21 +3,20 @@ Cannot run simultaneously with that script on the MBI cluster:
 40 jobs loading data is apparently too much.
 """
 
+import os
+
+SEAMLESS_DELEGATION_LEVEL = os.environ["SEAMLESS_DELEGATION_LEVEL"]
+# Must be defined in a config file
+
 import seamless
 from tqdm import tqdm
 
-###seamless.delegate()
-seamless.delegate(level=3)  ###
-
 import parse_mmcif_header
 
-from seamless.highlevel import Checksum, Buffer
+from seamless.workflow import Buffer
 
-allpdb = Checksum.load("allpdb.CHECKSUM")
-allpdb = allpdb.resolve("plain")
-
-allpdb_keyorder = Checksum.load("allpdb-keyorder.CHECKSUM")
-allpdb_keyorder = allpdb_keyorder.resolve("plain")
+allpdb = Buffer.load("allpdb-index.json").deserialize("plain")
+allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
 
 from seamless import transformer
 
@@ -37,6 +36,8 @@ def parse_mmcif_headers(mmcifs):
 parse_mmcif_headers.celltypes.mmcifs = "folder"
 parse_mmcif_headers.celltypes.result = "deepcell"
 parse_mmcif_headers.modules.parse_mmcif_header = parse_mmcif_header
+
+seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL)
 
 chunksize = 50
 key_chunks = [

@@ -11,22 +11,21 @@ NOTE: tricky to get poolsize working, poolsize 200 freezes all on the MBI cluste
 NOTE: give workers to the hashserver using uvicorn
 """
 
+import os
+
+SEAMLESS_DELEGATION_LEVEL = os.environ["SEAMLESS_DELEGATION_LEVEL"]
+# Must be defined in a config file
+
 import seamless
 from tqdm import tqdm
 
-###seamless.delegate()
-seamless.delegate(level=3)  ###
+from seamless.workflow import Buffer
 
-from seamless.highlevel import Checksum, Buffer
-
-allpdb = Checksum.load("allpdb.CHECKSUM")
-allpdb = allpdb.resolve("plain")
-
-allpdb_keyorder = Checksum.load("allpdb-keyorder.CHECKSUM")
-allpdb_keyorder = allpdb_keyorder.resolve("plain")
+allpdb = Buffer.load("allpdb-index.json").deserialize("plain")
+allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
 
 from seamless import transformer
-from nefertiti.functions import parse_mmcif
+import parse_mmcif
 
 
 @transformer(return_transformation=True)
@@ -44,6 +43,8 @@ def parse_mmcifs(mmcifs):
 parse_mmcifs.celltypes.mmcifs = "folder"
 parse_mmcifs.celltypes.result = "deepcell"
 parse_mmcifs.modules.parse_mmcif = parse_mmcif
+
+seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL)
 
 chunksize = 50
 key_chunks = [
