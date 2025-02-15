@@ -2,6 +2,7 @@
 
 import sys
 import seamless
+
 seamless.delegate(level=1)
 
 from seamless.highlevel import Checksum
@@ -19,9 +20,11 @@ for k, cs0 in data_index.items():
 from seamless import transformer
 from nefertiti.functions import parse_mmcif
 
+
 @transformer(return_transformation=True)
 def parse_mmcifs(mmcifs):
     from . import parse_mmcif
+
     result = {}
     for cifname, cifbuffer in mmcifs.items():
         print(cifname)
@@ -30,6 +33,8 @@ def parse_mmcifs(mmcifs):
         result[cifname] = struc
         print(cifname)
     return result
+
+
 parse_mmcifs.celltypes.mmcifs = "folder"
 parse_mmcifs.celltypes.result = "deepcell"
 parse_mmcifs.modules.parse_mmcif = parse_mmcif

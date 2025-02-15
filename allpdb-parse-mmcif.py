@@ -10,12 +10,15 @@ NOTE: tricky to get poolsize working, poolsize 200 freezes all on the MBI cluste
 
 NOTE: give workers to the hashserver using uvicorn
 """
+
 import seamless
 from tqdm import tqdm
+
 ###seamless.delegate()
-seamless.delegate(level=3) ###
+seamless.delegate(level=3)  ###
 
 from seamless.highlevel import Checksum, Buffer
+
 allpdb = Checksum.load("allpdb.CHECKSUM")
 allpdb = allpdb.resolve("plain")
 
@@ -25,30 +28,37 @@ allpdb_keyorder = allpdb_keyorder.resolve("plain")
 from seamless import transformer
 from nefertiti.functions import parse_mmcif
 
+
 @transformer(return_transformation=True)
 def parse_mmcifs(mmcifs):
     from .parse_mmcif import parse_mmcif
+
     result = {}
     for cifname, cifbuffer in mmcifs.items():
         cifdata = cifbuffer.decode()
         struc = parse_mmcif(cifdata, auth_chains=False, auth_residues=False)
         result[cifname] = struc
     return result
+
+
 parse_mmcifs.celltypes.mmcifs = "folder"
 parse_mmcifs.celltypes.result = "deepcell"
 parse_mmcifs.modules.parse_mmcif = parse_mmcif
 
 chunksize = 50
-key_chunks = [allpdb_keyorder[n:n+chunksize] for n in range(0, len(allpdb_keyorder), chunksize)]
+key_chunks = [
+    allpdb_keyorder[n : n + chunksize]
+    for n in range(0, len(allpdb_keyorder), chunksize)
+]
 nchunks = len(key_chunks)
-forbidden = {'1ejg.cif', '4udf.cif'}
+forbidden = {"1ejg.cif", "4udf.cif"}
 for key_chunk in key_chunks:
     key_chunk[:] = [k for k in key_chunk if k not in forbidden]
 
 with tqdm(total=nchunks, desc="Parse mmCIF") as progress_bar:
 
     def parse_mmcifs_chunk(chunk_index):
-        cif_chunk = {k:allpdb[k] for k in key_chunks[chunk_index]}
+        cif_chunk = {k: allpdb[k] for k in key_chunks[chunk_index]}
         return parse_mmcifs(cif_chunk)
 
     def callback(n, parsed_chunk):
@@ -67,17 +77,24 @@ with tqdm(total=nchunks, desc="Parse mmCIF") as progress_bar:
 if not any([parsed_chunk.checksum.value is None for parsed_chunk in parsed_chunks]):
     results = [parsed_chunk.checksum for parsed_chunk in parsed_chunks]
     result_index = {}
-    
-    '''
+
+    """
     # Naive way
     print("Collect parsed mmCIF results...")
     for cs in tqdm(results):
         chunk_dict = cs.resolve("plain")
         result_index.update(chunk_dict)
     print("...done")
-    '''
-    with tqdm(total=len(results), desc="Collect parsed mmCIF results...") as progress_bar:
-        for chunk_dict in seamless.multi.resolve(results, nparallel=50, celltype="plain", callback= lambda *_: progress_bar.update(1)):
+    """
+    with tqdm(
+        total=len(results), desc="Collect parsed mmCIF results..."
+    ) as progress_bar:
+        for chunk_dict in seamless.multi.resolve(
+            results,
+            nparallel=50,
+            celltype="plain",
+            callback=lambda *_: progress_bar.update(1),
+        ):
             result_index.update(chunk_dict)
 
     buf = Buffer(result_index, celltype="plain")

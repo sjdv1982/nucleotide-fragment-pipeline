@@ -3,6 +3,7 @@
 import os
 import sys
 import seamless
+
 seamless.delegate(level=1)
 
 from seamless.highlevel import Checksum
@@ -32,9 +33,11 @@ for k, cs0 in test_strucs.items():
     cs = Checksum(cs0)
     print(k, cs.resolve("binary")[0])
 
+
 @transformer(return_transformation=True)
 def detect_interfaces_chunk(strucs, headers):
     from .detect_interfaces import detect_interfaces
+
     result = {}
     for cifname, struc in strucs.items():
         if cifname not in headers:
@@ -44,6 +47,8 @@ def detect_interfaces_chunk(strucs, headers):
         result[cifname] = interfaces
         print(cifname, interfaces)
     return result
+
+
 detect_interfaces_chunk.celltypes.strucs = "deepcell"
 detect_interfaces_chunk.celltypes.headers = "deepcell"
 detect_interfaces_chunk.celltypes.result = "deepcell"

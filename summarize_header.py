@@ -1,5 +1,6 @@
 from seamless import Buffer
 
+
 def summarize_header(header, keys):
     result = {}
     for k in keys:
@@ -17,6 +18,7 @@ def summarize_header(header, keys):
             target[kk] = sub[kk]
     return result
 
+
 def load_header_keys(filename):
     keys = []
     with open(filename) as f:
@@ -28,8 +30,10 @@ def load_header_keys(filename):
             keys.append(fields)
     return keys
 
+
 if __name__ == "__main__":
     import sys
+
     full_header_file = sys.argv[1]
     header_keys_file = sys.argv[2]
     summarized_header_file = sys.argv[3]

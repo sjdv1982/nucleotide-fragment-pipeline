@@ -1,15 +1,16 @@
 from seamless.core.protocol.json import json_dumps
 
+
 def summarize_header_asym(header):
     keys = (
         "pdbx_struct_assembly_gen",
         "pdbx_struct_oper_list",
         ("struct_ref", "entity_id"),
         ("struct_ref", "db_code"),
-        ("entity_poly","entity_id"),
-        ("entity_poly","type"),
-        ("struct_asym","id"),
-        ("struct_asym","entity_id"),
+        ("entity_poly", "entity_id"),
+        ("entity_poly", "type"),
+        ("struct_asym", "id"),
+        ("struct_asym", "entity_id"),
     )
     result = {}
     for knr, k in enumerate(keys):
@@ -29,9 +30,11 @@ def summarize_header_asym(header):
             target[kk] = sub[kk]
     return result
 
+
 if __name__ == "__main__":
     import sys
     import json
+
     full_header_file = sys.argv[1]
     asym_header_file = sys.argv[2]
     with open(full_header_file) as f:

@@ -1,6 +1,8 @@
 import itertools
 import re
-parenthesis_match = re.compile(r'\([^\(\)]*?\)')
+
+parenthesis_match = re.compile(r"\([^\(\)]*?\)")
+
 
 def _parseOperationSubExpression(expression) -> list[int]:
     expression = expression.strip()
@@ -22,17 +24,21 @@ def _parseOperationSubExpression(expression) -> list[int]:
         operations = [expression]
     return operations
 
+
 def _parseOperationExpression(expression):
     subexpressions = [m[1:-1] for m in re.findall(parenthesis_match, expression)]
     if not subexpressions:
         subexpressions = [expression]
-    parsed_subexpressions = [_parseOperationSubExpression(subexpression) for subexpression in subexpressions]
+    parsed_subexpressions = [
+        _parseOperationSubExpression(subexpression) for subexpression in subexpressions
+    ]
     unrolled_subexpressions = list(itertools.product(*reversed(parsed_subexpressions)))
     return unrolled_subexpressions
 
+
 def _nest_dict(cif):
     result = {}
-    for k,v in cif.items():
+    for k, v in cif.items():
         parent = result
         fields = k.split(".")
         for field in fields[:-1]:
@@ -42,8 +48,9 @@ def _nest_dict(cif):
         parent[fields[-1]] = v
     return result
 
+
 def _replace_operation_expressions(d):
-    for k,v in d.items():
+    for k, v in d.items():
         if isinstance(v, dict):
             _replace_operation_expressions(v)
             continue
@@ -57,11 +64,13 @@ def _replace_operation_expressions(d):
                 vlist_parsed.append(vv_parsed)
             d[k] = vlist_parsed
 
+
 def parse_mmcif_header(mmcif_data):
     from io import StringIO
     from Bio.PDB.MMCIF2Dict import MMCIF2Dict
+
     mmcif_obj = StringIO(mmcif_data)
-    cif=MMCIF2Dict(mmcif_obj)
+    cif = MMCIF2Dict(mmcif_obj)
     result = {}
     if "data_" in cif:
         result["data"] = cif["data_"]
@@ -79,10 +88,10 @@ def parse_mmcif_header(mmcif_data):
     return result_nested
 
 
-
 if __name__ == "__main__":
     import sys
     import json
+
     mmcif_file = sys.argv[1]
     outfile = sys.argv[2]
     data = parse_mmcif_header(open(mmcif_file).read())

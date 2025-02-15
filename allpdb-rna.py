@@ -2,7 +2,9 @@ from seamless import Buffer
 import numpy as np
 from tqdm import tqdm
 
-interface_index, interface_data = Buffer.load("allpdb-filtered-interfaces").deserialize("mixed")
+interface_index, interface_data = Buffer.load("allpdb-filtered-interfaces").deserialize(
+    "mixed"
+)
 strucs = Buffer.load("allpdb-interface-struc").deserialize("mixed")
 
 rna_strucs = []
@@ -12,7 +14,7 @@ for code, struc0 in tqdm(strucs.items()):
     if_start, if_size = interface_index[code]
     if not if_size:
         continue
-    interfaces = interface_data[if_start:if_start+if_size]
+    interfaces = interface_data[if_start : if_start + if_size]
     struc = struc0[struc0["model"] == 1]
     rna_chains = np.unique(interfaces["chain2"])
     for rna_chain in rna_chains:
@@ -25,5 +27,4 @@ rna_strucs = np.concatenate(rna_strucs)
 allpdb_rna = rna_struc_index, rna_strucs
 buf = Buffer(allpdb_rna, celltype="mixed")
 buf.save("allpdb-rna")
-buf.checksum.save("allpdb-rna.CHECKSUM")    
-
+buf.checksum.save("allpdb-rna.CHECKSUM")
