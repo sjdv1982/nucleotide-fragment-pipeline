@@ -100,4 +100,4 @@ if not any([parsed_chunk.checksum.value is None for parsed_chunk in parsed_chunk
 
     buf = Buffer(result_index, celltype="plain")
     buf.save("allpdb-struc-index.json")
-    buf.checksum.save("allpdb-struc-index.json.CHECKSUM")
+    buf.get_checksum().save("allpdb-struc-index.json.CHECKSUM")
