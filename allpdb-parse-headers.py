@@ -5,7 +5,7 @@ Cannot run simultaneously with that script on the MBI cluster:
 
 import os
 
-SEAMLESS_DELEGATION_LEVEL = os.environ["SEAMLESS_DELEGATION_LEVEL"]
+SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
 # Must be defined in a config file
 
 import seamless
@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 import parse_mmcif_header
 
-from seamless.workflow import Buffer
+from seamless import Buffer
 
 allpdb = Buffer.load("allpdb-index.json").deserialize("plain")
 allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
