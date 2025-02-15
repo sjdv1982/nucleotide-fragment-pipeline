@@ -1,0 +1,52 @@
+1a34.cif data_1A34
+# 
+_entry.id   1A34 
+# 
+_audit_conform.d
+1b7f.cif data_1B7F
+# 
+_entry.id   1B7F 
+# 
+_audit_conform.d
+2vyc.cif data_2VYC
+# 
+_entry.id   2VYC 
+# 
+_audit_conform.d
+6ydw.cif data_6YDW
+# 
+_entry.id   6YDW 
+# 
+_audit_conform.d
+1a34.cif
+1a34.cif
+1b7f.cif
+1b7f.cif
+2vyc.cif
+2vyc.cif
+6ydw.cif
+6ydw.cif
+*************************************************
+* Result
+*************************************************
+{'1a34.cif': '6883b4c975e0edc7b3cdc645e43fdac4458834a8d4adc534e59b7264a08e9c4f', '1b7f.cif': '1b4e8d77f55805e250289a19a0f91151c9db14fae93da0c765ff035ed5b6a7f0', '2vyc.cif': '315595a3b0ad3174945964308a5b1e2a0be0b98956c1bf56867eef88519eff5f', '6ydw.cif': '5496b36a633d743b232b6cdbc45e2a5b7fe24632a6f1f1e40be4f04a8328da2a'}
+*************************************************
+* Standard output
+*************************************************
+1a34.cif
+1a34.cif
+1b7f.cif
+1b7f.cif
+2vyc.cif
+2vyc.cif
+6ydw.cif
+6ydw.cif
+
+*************************************************
+Execution time: 7.8 seconds
+*************************************************
+Exception: None
+1a34.cif (1, b' ', b'N', b' ', b'THR', b'A', 1, b' ', 13, 0.411, 47.272, 30.977, 1., 0., b' ', b'N')
+1b7f.cif (1, b' ', b'OP3', b' ', b'G', b'A', 1, b' ', 1, 43.063, 59.607, 115.478, 1., 0., b' ', b'O')
+2vyc.cif (1, b' ', b'N', b' ', b'MET', b'A', 1, b' ', 1, 128.352, -1.581, 46.99, 1., 0., b' ', b'N')
+6ydw.cif (1, b' ', b'N', b' ', b'THR', b'A', 1, b' ', 70, 121.507, 166.452, 190.579, 1., 0., b' ', b'N')
