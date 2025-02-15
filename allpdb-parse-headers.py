@@ -37,7 +37,7 @@ parse_mmcif_headers.celltypes.mmcifs = "folder"
 parse_mmcif_headers.celltypes.result = "deepcell"
 parse_mmcif_headers.modules.parse_mmcif_header = parse_mmcif_header
 
-seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL)
+seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL, raise_exceptions=True)
 
 chunksize = 50
 key_chunks = [

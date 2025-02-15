@@ -44,7 +44,7 @@ parse_mmcifs.celltypes.mmcifs = "folder"
 parse_mmcifs.celltypes.result = "deepcell"
 parse_mmcifs.modules.parse_mmcif = parse_mmcif
 
-seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL)
+seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL, raise_exceptions=True)
 
 chunksize = 50
 key_chunks = [
