@@ -79,10 +79,10 @@ if not any(
     results_cs = [processed_chunk.checksum for processed_chunk in processed_chunks]
     results = {}
     for cs in tqdm(results_cs):
-        chunk_dict = cs.resolve("mixed")
+        chunk_dict = cs.resolve("plain")
         results.update(chunk_dict)
     print("...done")
 
-    buf = Buffer(results, celltype="mixed")
-    buf.save("allpdb-header-summarized")
-    buf.get_checksum().save("allpdb-header-summarized.CHECKSUM")
+    buf = Buffer(results, celltype="plain")
+    buf.save("allpdb-header-summarized.json")
+    buf.get_checksum().save("allpdb-header-summarized.json.CHECKSUM")
