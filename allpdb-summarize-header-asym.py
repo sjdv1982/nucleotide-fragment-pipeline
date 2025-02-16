@@ -79,5 +79,6 @@ if not any(
     print("...done")
 
     buf = Buffer(results, celltype="plain")
-    buf.save("allpdb-header-summarized-asym.json")
+    os.makedirs("intermediate", exist_ok=True)
+    buf.save("intermediate/allpdb-header-summarized-asym.json")
     buf.checksum.save("allpdb-header-summarized-asym.json.CHECKSUM")
