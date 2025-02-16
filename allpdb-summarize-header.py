@@ -3,29 +3,23 @@ Maximum jobs on Newton: 10
 Good use case to test hashserver
 """
 
-POOLSIZE = 3
-# POOLSIZE = 30
+POOLSIZE = 30
 
-import json
+import os
+
+SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
+# Must be defined in a config file
+
 import seamless
 from tqdm import tqdm
 
-###seamless.delegate()
-seamless.delegate(level=3)  ###
-
-from seamless.highlevel import Checksum
 from seamless import transformer
 import summarize_header
 
-from seamless.highlevel import Checksum, Buffer
+from seamless import Buffer
 
-allpdb_keyorder = Checksum.load("allpdb-keyorder.CHECKSUM")
-allpdb_keyorder = allpdb_keyorder.resolve("plain")
-
-with open("allpdb-header-index.json") as f:
-    allpdb_headers = json.load(f)
-# or:
-# allpdb_headers = Buffer.load("allpdb-header-index.json").deserialize("plain")
+allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
+allpdb_headers = Buffer.load("allpdb-header-index.json").deserialize("plain")
 
 header_keys_file = "summarize_header_keys.txt"
 header_keys = summarize_header.load_header_keys(header_keys_file)
@@ -46,6 +40,8 @@ def summarize_header_chunk(headers, header_keys):
 summarize_header_chunk.celltypes.headers = "deepcell"
 summarize_header_chunk.celltypes.result = "mixed"
 summarize_header_chunk.modules.summarize_header = summarize_header
+
+seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL, raise_exceptions=True)
 
 chunksize = 500
 key_chunks = [
@@ -89,4 +85,4 @@ if not any(
 
     buf = Buffer(results, celltype="mixed")
     buf.save("allpdb-header-summarized")
-    buf.checksum.save("allpdb-header-summarized.CHECKSUM")
+    buf.get_checksum().save("allpdb-header-summarized.CHECKSUM")

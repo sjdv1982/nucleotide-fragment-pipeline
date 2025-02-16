@@ -1,32 +1,23 @@
 """See allpdb-parse-mmcif.py
-Maximum jobs on MBI cluster: 40
 """
 
 POOLSIZE = 30
 
-import json
 import os
-import sys
-import numpy as np
+
+SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
+# Must be defined in a config file
+
+import os
 import seamless
 from tqdm import tqdm
 
-###seamless.delegate()
-seamless.delegate(level=3)  ###
-
-from seamless.highlevel import Checksum
+from seamless import Buffer
 from seamless import transformer
 import summarize_header_asym
 
-from seamless.highlevel import Checksum, Buffer
-
-allpdb_keyorder = Checksum.load("allpdb-keyorder.CHECKSUM")
-allpdb_keyorder = allpdb_keyorder.resolve("plain")
-
-with open("allpdb-header-index.json") as f:
-    allpdb_headers = json.load(f)
-# or:
-# allpdb_headers = Buffer.load("allpdb-header-index.json").deserialize("plain")
+allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
+allpdb_headers = Buffer.load("allpdb-header-index.json").deserialize("plain")
 
 
 @transformer(return_transformation=True)
@@ -44,6 +35,8 @@ def summarize_header_asym_chunk(headers):
 summarize_header_asym_chunk.celltypes.headers = "deepcell"
 summarize_header_asym_chunk.celltypes.result = "mixed"
 summarize_header_asym_chunk.modules.summarize_header_asym = summarize_header_asym
+
+seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL, raise_exceptions=True)
 
 chunksize = 500
 key_chunks = [

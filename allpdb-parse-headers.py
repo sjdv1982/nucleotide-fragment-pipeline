@@ -1,6 +1,8 @@
 """See allpdb-parse-mmcif.py
 Cannot run simultaneously with that script on the MBI cluster:
 40 jobs loading data is apparently too much.
+
+UPDATE: DON'T PUT DATABASE FILE ON NFS!!!! If it is in /tmp then it works
 """
 
 import os
