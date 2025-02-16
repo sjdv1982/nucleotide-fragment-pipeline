@@ -85,5 +85,5 @@ if not any(
 
     buf = Buffer(results, celltype="plain")
     os.makedirs("intermediate", exist_ok=True)
-    buf.save("allpdb-header-summarized.json")
+    buf.save("intermediate/allpdb-header-summarized.json")
     buf.get_checksum().save("allpdb-header-summarized.json.CHECKSUM")
