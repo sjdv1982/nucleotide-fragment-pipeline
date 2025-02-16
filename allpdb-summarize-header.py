@@ -78,7 +78,7 @@ if not any(
     print("Collect summarized header results...")
     results_cs = [processed_chunk.checksum for processed_chunk in processed_chunks]
     results = {}
-    for cs in results_cs:
+    for cs in tqdm(results_cs):
         chunk_dict = cs.resolve("mixed")
         results.update(chunk_dict)
     print("...done")

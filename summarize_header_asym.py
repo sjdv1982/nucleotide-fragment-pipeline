@@ -1,6 +1,3 @@
-from seamless.core.protocol.json import json_dumps
-
-
 def summarize_header_asym(header):
     keys = (
         "pdbx_struct_assembly_gen",
@@ -41,4 +38,4 @@ if __name__ == "__main__":
         full_header = json.load(f)
     asym_header = summarize_header_asym(full_header)
     with open(asym_header_file, "w") as f:
-        f.write(json_dumps(asym_header) + "\n")
+        f.write(json.dumps(asym_header) + "\n")
