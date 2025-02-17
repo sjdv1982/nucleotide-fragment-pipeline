@@ -7,7 +7,7 @@ UPDATE: DON'T PUT DATABASE FILE ON NFS!!!! If it is in /tmp then it works
 
 import os
 
-POOLSIZE = os.environ["POOLSIZE"]
+POOLSIZE = int(os.environ["POOLSIZE"])
 SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
 # Must be defined in a config file
 

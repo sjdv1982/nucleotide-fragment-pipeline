@@ -13,7 +13,7 @@ NOTE: give workers to the hashserver using uvicorn
 
 import os
 
-POOLSIZE = os.environ["POOLSIZE"]
+POOLSIZE = int(os.environ["POOLSIZE"])
 SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
 # Must be defined in a config file
 
