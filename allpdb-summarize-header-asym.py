@@ -1,5 +1,10 @@
 """See allpdb-parse-mmcif.py
-Maximum poolsize on cluster: 30 (recommended: 1)
+
+Reading input is the limiting factor.
+Poolsize=20 is reasonable if the input files are available via a folder
+(SEAMLESS_READ_BUFFER_FOLDERS). Hashserver is usually too slow.`
+
+Runs in about 15 mins on the MBI cluster.
 """
 
 import os

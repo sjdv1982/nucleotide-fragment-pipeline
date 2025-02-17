@@ -1,6 +1,7 @@
 """See allpdb-parse-mmcif.py
-Cannot run simultaneously with that script on the MBI cluster:
-40 jobs loading data is apparently too much.
+Reading input is the limiting factor.
+Poolsize=20 is reasonable if the input files are available via a folder
+(SEAMLESS_READ_BUFFER_FOLDERS). Hashserver is usually too slow.`
 
 UPDATE: DON'T PUT DATABASE FILE ON NFS!!!! If it is in /tmp then it works
 """

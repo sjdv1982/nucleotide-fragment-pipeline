@@ -1,8 +1,12 @@
 Pipeline:
 
-TODO: add .mixed extension
+TODO: add ./config subrepo => nucleotide-fragment-pipeline-config. Will also contain:
+    -  .job files
+    -  ~/seamless-deployment config (remove Dask!) . Corresponds to step 1 and 1a => adapt seamless-config-step1.sh
+    - job .out files (add in .gitignore)
 
 Step 0. Starts with the entire PDB in mmcif format
+    Size: about 300 GB
     TODO: input dir that contains all mmcifs, rsynced
     TODO: Seamless script that generates Seamless fairdir from this
     TODO: make a seamless-fair conda package (with the abilities of the current seamless-development conda environment). Remove it from the seamless Docker image? /home/sjoerd/seamless/tests/fairserver/README.txt is messy anyway... and slightly out-of-date (key order is random now)
@@ -13,6 +17,9 @@ Step 0. Starts with the entire PDB in mmcif format
     Result: "allpdb" deepcell and "allpdb-keyorder" (TODO: store the files and add to the repo, not just the checksums)
 
 Step 1: parse all PDBs using Biopython
+    Duration: 
+        MBI cluster: about 1h on one compute node, mmcifs read via NFS, ppdbs already present
+            If ppdbs need to be written via hashserver: about 2h
     Purpose: store all PDBs in ppdb ("parsed PDB") format, a Numpy structured dtype.
     Library code: parse_mmcif.py
     Pipeline code: allpdb-parse-mmcif.py
@@ -21,6 +28,7 @@ Step 1: parse all PDBs using Biopython
     TODO: store ppdb dtype in a code file (now in parse_mmcif.py)
     TODO: make this incremental
     Result: allpdb-struc-index.json deepcell (18 MB, add to the repo) and checksum
+        Deepcell size (i.e. all ppdbs): about 120 GB
 
 Step 1a: parse all PDB headers using Biopython
     Purpose: create a dict that can be queried for useful properties, notably:
