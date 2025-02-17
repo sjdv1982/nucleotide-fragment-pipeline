@@ -73,7 +73,7 @@ if not any(
     print("Collect summarized asym header results...")
     results_cs = [processed_chunk.checksum for processed_chunk in processed_chunks]
     results = {}
-    for cs in results_cs:
+    for cs in tqdm(results_cs):
         chunk_dict = cs.resolve("plain")
         results.update(chunk_dict)
     print("...done")
@@ -81,4 +81,4 @@ if not any(
     buf = Buffer(results, celltype="plain")
     os.makedirs("intermediate", exist_ok=True)
     buf.save("intermediate/allpdb-header-summarized-asym.json")
-    buf.checksum.save("allpdb-header-summarized-asym.json.CHECKSUM")
+    buf.get_checksum().save("allpdb-header-summarized-asym.json.CHECKSUM")
