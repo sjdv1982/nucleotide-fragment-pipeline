@@ -13,6 +13,7 @@ NOTE: give workers to the hashserver using uvicorn
 
 import os
 
+POOLSIZE = os.environ["POOLSIZE"]
 SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
 # Must be defined in a config file
 
@@ -72,7 +73,7 @@ with tqdm(total=nchunks, desc="Parse mmCIF") as progress_bar:
     logs: {parsed_chunk.logs}"""
             )
 
-    with seamless.multi.TransformationPool(40) as pool:
+    with seamless.multi.TransformationPool(POOLSIZE) as pool:
         parsed_chunks = pool.apply(parse_mmcifs_chunk, nchunks, callback=callback)
 
 if not any([parsed_chunk.checksum.value is None for parsed_chunk in parsed_chunks]):

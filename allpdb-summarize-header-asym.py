@@ -1,10 +1,10 @@
 """See allpdb-parse-mmcif.py
+Maximum poolsize on cluster: 30 (recommended: 1)
 """
-
-POOLSIZE = 30
 
 import os
 
+POOLSIZE = os.environ["POOLSIZE"]
 SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
 # Must be defined in a config file
 

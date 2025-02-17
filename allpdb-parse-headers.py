@@ -7,6 +7,7 @@ UPDATE: DON'T PUT DATABASE FILE ON NFS!!!! If it is in /tmp then it works
 
 import os
 
+POOLSIZE = os.environ["POOLSIZE"]
 SEAMLESS_DELEGATION_LEVEL = int(os.environ["SEAMLESS_DELEGATION_LEVEL"])
 # Must be defined in a config file
 
@@ -64,7 +65,7 @@ with tqdm(total=nchunks, desc="Parse mmCIF headers") as progress_bar:
     logs: {parsed_chunk.logs}"""
             )
 
-    with seamless.multi.TransformationPool(40) as pool:
+    with seamless.multi.TransformationPool(POOLSIZE) as pool:
         parsed_chunks = pool.apply(
             parse_mmcif_headers_chunk, nchunks, callback=callback
         )
