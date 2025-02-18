@@ -1,0 +1,3 @@
+[submodule "aareduce"]
+	path = aareduce
+	url = git@github.com:sjdv1982/aareduce.git
