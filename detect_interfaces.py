@@ -134,6 +134,7 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
 
     chain_struc = {}
     chain_coors = {}
+    chain_ball = {}
     chain_identifiers = {}
     struc_kd_trees = {}
     struc_resids = {}
@@ -146,6 +147,11 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
         chain_struc[chain] = curr_struc
         coor = get_coor(curr_struc)
         chain_coors[chain] = coor
+        com = coor.mean(axis=0)
+        cen = coor - com
+        dis = np.linalg.norm(cen, axis=1)
+        radius = dis.max()
+        chain_ball[chain] = com, radius
         struc_kd_tree = KDTree(coor)
         struc_kd_trees[chain] = struc_kd_tree
         struc_resids[chain] = curr_struc["resid"]
@@ -293,6 +299,7 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
             if bad_rotation:
                 continue
 
+            print("HERE", assembly, chain1)
             curr_lig_coors = []
             for M3ind, M3_44 in enumerate(M3_44s):
                 M3 = M3_44[:3, :3]
@@ -332,6 +339,14 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
                         M4O = M4_44[3, :3]
 
                         Mlig, MligO = mmult(M4, M4O, M3T, M3TO)
+
+                        com1, radius1 = chain_ball[chain1]
+                        com2_0, radius2 = chain_ball[chain2]
+                        com2 = com2_0.dot(Mlig) + MligO
+                        rdis = np.linalg.norm(com2 - com1)
+                        if rdis > radius1 + radius2 + 5:
+                            continue
+
                         lig_coor = lig_coor0.dot(Mlig) + MligO
                         lig_bb = get_bb(lig_coor)
                         curr_lig_coors.append((chain2, M3ind, M4ind, lig_bb))
