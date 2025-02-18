@@ -37,4 +37,4 @@ for key_chunk in tqdm(key_chunks):
 
 buf = Buffer(result, celltype="mixed")
 buf.save("intermediate/allpdb-interface-struc.mixed")
-buf.checksum.save("intermediate/allpdb-interface-struc.mixed.CHECKSUM")
+buf.get_checksum().save("intermediate/allpdb-interface-struc.mixed.CHECKSUM")
