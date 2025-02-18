@@ -299,7 +299,6 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
             if bad_rotation:
                 continue
 
-            print("HERE", assembly, chain1)
             curr_lig_coors = []
             for M3ind, M3_44 in enumerate(M3_44s):
                 M3 = M3_44[:3, :3]
