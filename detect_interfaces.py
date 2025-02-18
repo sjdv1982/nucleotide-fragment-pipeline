@@ -232,13 +232,21 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
             coor_rec = chain_coors[chain1]
             bb_rec = get_bb(coor_rec)
             M3_44s = []
+            bad_rotation = False
             for oper_expression in oper_expressions:
                 M3_44 = np.eye(4)
                 for oper in oper_expression:
                     M3_44 = M3_44.dot(operations[oper].T)
-                    M3_44[:3, :3] = Rotation.from_matrix(M3_44[:3, :3]).as_matrix()
+                    try:
+                        M3_44[:3, :3] = Rotation.from_matrix(M3_44[:3, :3]).as_matrix()
+                    except ValueError:
+                        bad_rotation = True
+                        break
                 M3_44s.append(M3_44)
-                            
+            
+            if bad_rotation:
+                continue 
+            
             curr_lig_coors = []
             for M3ind, M3_44 in enumerate(M3_44s):
                 M3 = M3_44[:3, :3]

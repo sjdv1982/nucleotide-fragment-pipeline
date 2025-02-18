@@ -26,7 +26,7 @@ import detect_interfaces
 from nefertiti.functions import superimpose
 
 allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
-allpdb_headers = Buffer.load("allpdb-header-index.json").deserialize("plain")
+allpdb_headers = Buffer.load("intermediate/allpdb-header-summarized-asym.json").deserialize("plain")
 allpdb_struc = Buffer.load("allpdb-struc-index.json").deserialize("plain")
 
 
@@ -46,14 +46,14 @@ def detect_interfaces_chunk(strucs, headers):
 
 
 detect_interfaces_chunk.celltypes.strucs = "deepcell"
-detect_interfaces_chunk.celltypes.headers = "mixed"
+detect_interfaces_chunk.celltypes.headers = "plain"
 detect_interfaces_chunk.celltypes.result = "mixed"
 detect_interfaces_chunk.modules.detect_interfaces = detect_interfaces
 detect_interfaces_chunk.modules.superimpose = superimpose
 
 seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL, raise_exceptions=True)
 
-chunksize = 30
+chunksize = 10
 key_chunks = [
     allpdb_keyorder[n : n + chunksize]
     for n in range(0, len(allpdb_keyorder), chunksize)
@@ -135,4 +135,4 @@ if not any(
 
     buf = Buffer(allpdb_interfaces, celltype="mixed")
     buf.save("intermediate/allpdb-interfaces.mixed")
-    buf.get_checksum().save("intermediate/allpdb-interfaces.mixed.CHECKSUM")
+    buf.get_checksum().save("allpdb-interfaces.mixed.CHECKSUM")
