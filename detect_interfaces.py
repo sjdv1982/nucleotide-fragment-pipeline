@@ -4,28 +4,33 @@ from collections import namedtuple
 import numpy as np
 from scipy.spatial import KDTree
 from scipy.spatial.transform import Rotation
+
 if not __name__.startswith("seamless_module"):
     # We are building this module from a Seamless Module object
     from nefertiti.functions.superimpose import superimpose
+
 
 def get_coor(mol):
     mol_coor = np.stack((mol["x"], mol["y"], mol["z"]), axis=-1)
     mol_coor = mol_coor.astype(np.float64)
     # It is very important to do all computations in float64
-    # Else you get rounding errors even above 0.1 A, 
+    # Else you get rounding errors even above 0.1 A,
     #  and in a non-deterministic way, breaking reproducibility
     # Conversely, you must *store* all coordinates in float32
     return mol_coor
+
 
 def mmult(curr_mat, curr_offset, new_mat, new_offset):
     result_mat = curr_mat.dot(new_mat)
     result_offset = curr_offset.dot(new_mat) + new_offset
     return result_mat, result_offset
 
+
 def minv(mat, offset):
     result_mat = mat.T
     result_offset = (-offset).dot(mat.T)
     return result_mat, result_offset
+
 
 def get_bb(coor):
     result = np.empty(6, dtype=coor.dtype)
@@ -35,18 +40,21 @@ def get_bb(coor):
     result[3:] = cmax
     return result
 
+
 def _arrayify_interfaces(interfaces):
-    matrix_dtype = np.dtype([
-        ("rotation", np.float32, (3,3)),
-        ("offset", np.float32, (3,))
-    ], align=True)
-    interface_dtype = np.dtype([
-        ("chain1", "S4"),
-        ("chain2", "S4"),
-        ("m1", matrix_dtype),
-        ("m2", matrix_dtype),
-        ("m_relative", matrix_dtype),
-    ], align=True)
+    matrix_dtype = np.dtype(
+        [("rotation", np.float32, (3, 3)), ("offset", np.float32, (3,))], align=True
+    )
+    interface_dtype = np.dtype(
+        [
+            ("chain1", "S4"),
+            ("chain2", "S4"),
+            ("m1", matrix_dtype),
+            ("m2", matrix_dtype),
+            ("m_relative", matrix_dtype),
+        ],
+        align=True,
+    )
     result = np.zeros(len(interfaces), dtype=interface_dtype)
     for ifnr, interface in enumerate(interfaces):
         iface = result[ifnr]
@@ -55,11 +63,16 @@ def _arrayify_interfaces(interfaces):
         iface["m2"]["rotation"], iface["m2"]["offset"] = interface[3]
         iface["m_relative"]["rotation"], iface["m_relative"]["offset"] = interface[4]
     for f in "m1", "m2", "m_relative":
-        result[f]["rotation"] = np.round(result[f]["rotation"], decimals=3) +0  # to avoid negative zeroes
-        result[f]["offset"] = np.round(result[f]["offset"], decimals=2) + 0 # to avoid negative zeroes
+        result[f]["rotation"] = (
+            np.round(result[f]["rotation"], decimals=3) + 0
+        )  # to avoid negative zeroes
+        result[f]["offset"] = (
+            np.round(result[f]["offset"], decimals=2) + 0
+        )  # to avoid negative zeroes
     return result
 
-def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
+
+def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
 
     if __name__.startswith("transformer"):
         # This module was built from a Seamless Module object,
@@ -75,21 +88,35 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
     operations = {}
     oper_list = header.get("pdbx_struct_oper_list", {})
     for oper_nr, oper_id in enumerate(oper_list["id"]):
-        op = np.array([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]], dtype=float)
+        op = np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]], dtype=float
+        )
 
         for i in range(3):
             op[i][3] = float(oper_list["vector[" + str(i + 1) + "]"][oper_nr])
             for j in range(3):
-                op[i][j] = float(oper_list["matrix[" + str(i + 1) + "][" + str(j + 1) + "]"][oper_nr])
+                op[i][j] = float(
+                    oper_list["matrix[" + str(i + 1) + "][" + str(j + 1) + "]"][oper_nr]
+                )
         operations[oper_id] = op
 
-    db_codes = {k:v for k,v in zip(header["struct_ref"]["entity_id"], header["struct_ref"]["db_code"])}
-    poly_entity_types = {eid:typ for eid,typ in zip(header["entity_poly"]["entity_id"], header["entity_poly"]["type"])}
+    db_codes = {
+        k: v
+        for k, v in zip(
+            header["struct_ref"]["entity_id"], header["struct_ref"]["db_code"]
+        )
+    }
+    poly_entity_types = {
+        eid: typ
+        for eid, typ in zip(
+            header["entity_poly"]["entity_id"], header["entity_poly"]["type"]
+        )
+    }
 
     struct_asym = header["struct_asym"]
 
     ChainCopy = namedtuple("ChainCopy", ("source", "derivative", "rotmat", "offset"))
-    chain_copies:list[ChainCopy] = []
+    chain_copies: list[ChainCopy] = []
     chain_copy_derivatives = {}
 
     """
@@ -115,7 +142,7 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
         ent_id = struct_asym["entity_id"][chain_nr]
         if ent_id not in poly_entity_types:
             continue
-        curr_struc = struc[struc["chain"]==chain.encode()]
+        curr_struc = struc[struc["chain"] == chain.encode()]
         chain_struc[chain] = curr_struc
         coor = get_coor(curr_struc)
         chain_coors[chain] = coor
@@ -125,7 +152,10 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
 
     def get_chain_identifiers(chain):
         if chain not in chain_identifiers:
-            identifiers = {(a["resid"], a["resname"], a["name"]): anr for anr, a in enumerate(chain_struc[chain])}
+            identifiers = {
+                (a["resid"], a["resname"], a["name"]): anr
+                for anr, a in enumerate(chain_struc[chain])
+            }
             chain_identifiers[chain] = identifiers
         return chain_identifiers[chain]
 
@@ -138,7 +168,7 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
 
         atoms1 = chain_struc[chain1]
         atom1_identifiers = get_chain_identifiers(chain1)
-            
+
         for chain2_nr, chain2 in enumerate(struct_asym["id"]):
             if chain2 in chain_copy_derivatives:
                 continue
@@ -161,12 +191,19 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                 continue
             atoms2 = chain_struc[chain2]
             atom2_identifiers = get_chain_identifiers(chain2)
-            common = set(atom1_identifiers.keys()).intersection(set(atom2_identifiers.keys()))
+            common = set(atom1_identifiers.keys()).intersection(
+                set(atom2_identifiers.keys())
+            )
             biggest_natoms = max(len(atoms1), len(atoms2))
-            if len(common)/biggest_natoms < 0.8:
+            if len(common) / biggest_natoms < 0.8:
                 continue
-            atom_pairs = np.array([(atom1_identifiers[idf], atom2_identifiers[idf]) for idf in common])
-            atom1_fit0, atom2_fit0 = chain_coors[chain1][atom_pairs[:, 0]], chain_coors[chain2][atom_pairs[:, 1]]
+            atom_pairs = np.array(
+                [(atom1_identifiers[idf], atom2_identifiers[idf]) for idf in common]
+            )
+            atom1_fit0, atom2_fit0 = (
+                chain_coors[chain1][atom_pairs[:, 0]],
+                chain_coors[chain2][atom_pairs[:, 1]],
+            )
             cm1 = atom1_fit0.mean(axis=0)
             cm2 = atom2_fit0.mean(axis=0)
             atom1_fit = atom1_fit0 - cm1
@@ -176,8 +213,10 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                 atom2_fitted = atom2_fit.dot(rotmat_initial)
                 delta = atom2_fitted - atom1_fit
                 minimal_common = int(np.ceil(0.8 * biggest_natoms))
-                delta_mask = np.argsort((delta*delta).sum(axis=1))[:minimal_common]
-                rotmat, rmsd = superimpose_func(atom2_fit[delta_mask], atom1_fit[delta_mask])
+                delta_mask = np.argsort((delta * delta).sum(axis=1))[:minimal_common]
+                rotmat, rmsd = superimpose_func(
+                    atom2_fit[delta_mask], atom1_fit[delta_mask]
+                )
             else:
                 rotmat = rotmat_initial
                 rmsd = rmsd_initial
@@ -185,10 +224,10 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
             if rmsd > 2:
                 continue
 
-            #print(chain1, chain2, ent1_id, ent2_id, db_codes.get(ent1_id), db_codes.get(ent2_id), len(atoms1), len(atoms2), len(common), rmsd)
+            # print(chain1, chain2, ent1_id, ent2_id, db_codes.get(ent1_id), db_codes.get(ent2_id), len(atoms1), len(atoms2), len(common), rmsd)
             cm2p = cm2.dot(rotmat)
             offset = -cm2p + cm1
-            #atom2_fitted = atom2_fit0.dot(rotmat) + offset
+            # atom2_fitted = atom2_fit0.dot(rotmat) + offset
             cop = ChainCopy(chain1, chain2, rotmat, offset)
             chain_copies.append(cop)
             chain_copy_derivatives[chain2] = cop
@@ -212,11 +251,18 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
     If not, store X, Y and R for the new interface.
     """
 
-    interfaces = [] # chain1, chain2, X, Y. Chain is original chain, i.e. not a copy.
+    interfaces = []  # chain1, chain2, X, Y. Chain is original chain, i.e. not a copy.
     for assembly in range(len(header["pdbx_struct_assembly_gen"]["assembly_id"])):
-        assembly_chains = [c.strip() for c in header["pdbx_struct_assembly_gen"]["asym_id_list"][assembly].split(",")]
+        assembly_chains = [
+            c.strip()
+            for c in header["pdbx_struct_assembly_gen"]["asym_id_list"][assembly].split(
+                ","
+            )
+        ]
 
-        oper_expressions = header["pdbx_struct_assembly_gen"]["oper_expression"][assembly]
+        oper_expressions = header["pdbx_struct_assembly_gen"]["oper_expression"][
+            assembly
+        ]
         if len(oper_expressions) > 200:
             # skip too massive assemblies
             continue
@@ -243,16 +289,16 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                         bad_rotation = True
                         break
                 M3_44s.append(M3_44)
-            
+
             if bad_rotation:
-                continue 
-            
+                continue
+
             curr_lig_coors = []
             for M3ind, M3_44 in enumerate(M3_44s):
                 M3 = M3_44[:3, :3]
                 M3O = M3_44[3, :3]
                 M3T, M3TO = minv(M3, M3O)
-                #print("ASSEM", chain1, assembly, M3ind, M3, M3O)
+                # print("ASSEM", chain1, assembly, M3ind, M3, M3O)
 
                 for chain2_nr, chain2 in enumerate(struct_asym["id"]):
                     if chain2_nr < chain1_nr:
@@ -264,7 +310,7 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                         continue
 
                     # Detect if interface is relevant
-                    # i.e. between chains with at least 3 residues per chain involved in contacts 
+                    # i.e. between chains with at least 3 residues per chain involved in contacts
 
                     lig_coor0 = chain_coors[chain2]
 
@@ -273,7 +319,9 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                         M4_44 = np.eye(4)
                         for oper in oper_expression2:
                             M4_44 = M4_44.dot(operations[oper].T)
-                            M4_44[:3, :3] = Rotation.from_matrix(M4_44[:3, :3]).as_matrix()
+                            M4_44[:3, :3] = Rotation.from_matrix(
+                                M4_44[:3, :3]
+                            ).as_matrix()
                         M4_44s.append(M4_44)
 
                     for M4ind, M4_44 in enumerate(M4_44s):
@@ -285,26 +333,32 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
 
                         Mlig, MligO = mmult(M4, M4O, M3T, M3TO)
                         lig_coor = lig_coor0.dot(Mlig) + MligO
-                        lig_bb = get_bb(lig_coor)       
+                        lig_bb = get_bb(lig_coor)
                         curr_lig_coors.append((chain2, M3ind, M4ind, lig_bb))
 
             if not curr_lig_coors:
                 continue
 
             rec_struc_tree = struc_kd_trees[chain1]
-            curr_lig_bb  = np.stack([coor[3] for coor in curr_lig_coors], axis=0)
+            curr_lig_bb = np.stack([coor[3] for coor in curr_lig_coors], axis=0)
             curr_lig_bb_min = curr_lig_bb[:, :3]
             curr_lig_bb_max = curr_lig_bb[:, 3:]
             bb_rec_min = bb_rec[:3]
             bb_rec_max = bb_rec[3:]
-            filt1 = (curr_lig_bb_min[:, 0] < bb_rec_max[0]) & (bb_rec_min[0] < curr_lig_bb_max[:, 0])
-            filt2 = (curr_lig_bb_min[:, 1] < bb_rec_max[1]) & (bb_rec_min[1] < curr_lig_bb_max[:, 1])
-            filt3 = (curr_lig_bb_min[:, 2] < bb_rec_max[2]) & (bb_rec_min[2] < curr_lig_bb_max[:, 2])
+            filt1 = (curr_lig_bb_min[:, 0] < bb_rec_max[0]) & (
+                bb_rec_min[0] < curr_lig_bb_max[:, 0]
+            )
+            filt2 = (curr_lig_bb_min[:, 1] < bb_rec_max[1]) & (
+                bb_rec_min[1] < curr_lig_bb_max[:, 1]
+            )
+            filt3 = (curr_lig_bb_min[:, 2] < bb_rec_max[2]) & (
+                bb_rec_min[2] < curr_lig_bb_max[:, 2]
+            )
             bb_filter = filt1 & filt2 & filt3
             for ind, (chain2, M3ind, M4ind, _) in enumerate(curr_lig_coors):
                 if not bb_filter[ind]:
                     continue
-                
+
                 M3_44 = M3_44s[M3ind]
                 M3 = M3_44[:3, :3]
                 M3O = M3_44[3, :3]
@@ -316,30 +370,33 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
 
                 lig_coor0 = chain_coors[chain2]
                 Mlig, MligO = mmult(M4, M4O, M3T, M3TO)
-                lig_coor = lig_coor0.dot(Mlig) + MligO                        
+                lig_coor = lig_coor0.dot(Mlig) + MligO
 
                 lig_struc_tree = KDTree(lig_coor)
                 ok = False
-                for (tree1, tree2, rec_chain) in ((rec_struc_tree, lig_struc_tree, chain1), (lig_struc_tree, rec_struc_tree, chain2)): 
+                for tree1, tree2, rec_chain in (
+                    (rec_struc_tree, lig_struc_tree, chain1),
+                    (lig_struc_tree, rec_struc_tree, chain2),
+                ):
                     rec_resid = struc_resids[rec_chain]
                     has_contact = np.zeros(len(rec_resid), dtype=bool)
                     contacts = tree1.query_ball_tree(tree2, r=5)
                     has_contact[:] = np.array([bool(l) for l in contacts])
                     ###has_contact[:] = 1 ###
                     if not has_contact.sum():
-                        #print("NO CONTACTS")
+                        # print("NO CONTACTS")
                         break
                     n_rec_res = len(np.unique(rec_resid[has_contact]))
                     if n_rec_res < 3:
-                        #print("TOO FEW RES", n_rec_res, rec_chain)
+                        # print("TOO FEW RES", n_rec_res, rec_chain)
                         break
-                    #print("ENOUGH RES", n_rec_res, rec_chain)
+                    # print("ENOUGH RES", n_rec_res, rec_chain)
                 else:
                     ok = True
-                
+
                 if not ok:
-                    #print("SKIP", chain1, chain2)
-                    #print()
+                    # print("SKIP", chain1, chain2)
+                    # print()
                     continue
 
                 # / detect if interface is relevant
@@ -363,7 +420,7 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                 if len(atoms1) < len(atoms2):
                     orichain1, orichain2 = orichain2, orichain1
                     M5, M5O, M6, M6O = M6, M6O, M5, M5O
-                
+
                 # Compute matrix X2
                 # (M5.T).dot(M3)
                 M5T, M5TO = minv(M5, M5O)
@@ -373,49 +430,54 @@ def detect_interfaces(struc:np.ndarray, header:dict) -> np.ndarray:
                 # (M6.T).dot(M4)
                 M6T, M6TO = minv(M6, M6O)
                 Y2, Y2O = mmult(M6T, M6TO, M4, M4O)
-                #print(X2, X2O)
-                #print(Y2, Y2O)
+                # print(X2, X2O)
+                # print(Y2, Y2O)
 
                 # Compute matrix R2
                 X2T, X2TO = minv(X2, X2O)
                 R2, R2O = mmult(Y2, Y2O, X2T, X2TO)
-                #print(R2, R2O)
+                # print(R2, R2O)
 
-                #print("ADD?", chain1, chain2)
+                # print("ADD?", chain1, chain2)
 
                 R2T, R2TO = minv(R2, R2O)
                 if orichain1 == orichain2:
                     direc1 = (np.sign(R2O) * R2O * R2O).sum()
                     direc2 = (np.sign(R2TO) * R2TO * R2TO).sum()
-                    #print("HOMO", direc1, direc2, R2O, R2TO)
+                    # print("HOMO", direc1, direc2, R2O, R2TO)
                     MIN_HOMO = 10
                     if direc2 > direc1 + MIN_HOMO:
-                        #print("HOMO", direc2-direc1)
+                        # print("HOMO", direc2-direc1)
                         X2, X2O, Y2, Y2O = Y2, Y2O, X2, X2O
                         X2T, X2TO = minv(X2, X2O)
-                        R2, R2O = mmult(Y2, Y2O, X2T, X2TO)                        
+                        R2, R2O = mmult(Y2, Y2O, X2T, X2TO)
                         R2T, R2TO = minv(R2, R2O)
-                                        
-                # Compare with existing interfaces                    
+
+                # Compare with existing interfaces
                 coor_chain2 = chain_coors[orichain2]
                 min_delta = None
                 for ifnr, interface in enumerate(interfaces):
-                    orichain1_0, orichain2_0, (X1, X1O), (Y1, Y1O), (R1, R1O) = interface
+                    orichain1_0, orichain2_0, (X1, X1O), (Y1, Y1O), (R1, R1O) = (
+                        interface
+                    )
                     if orichain1_0 != orichain1 or orichain2_0 != orichain2:
                         continue
                     D, DO = mmult(R1, R1O, R2T, R2TO)
                     coor_chain2_D = coor_chain2.dot(D) + DO
-                    delta = (coor_chain2_D - coor_chain2)
-                    delta_rmsd = np.sqrt((delta*delta).sum(axis=1).mean())
-                    #print("DELTA", ifnr, delta_rmsd)
+                    delta = coor_chain2_D - coor_chain2
+                    delta_rmsd = np.sqrt((delta * delta).sum(axis=1).mean())
+                    # print("DELTA", ifnr, delta_rmsd)
                     if delta_rmsd < 5:
                         break
                     if min_delta is None or min_delta > delta_rmsd:
                         min_delta = delta_rmsd
-                else:            
-                    #print(len(interfaces)+1, "ADD", chain1, chain2, assembly, M3ind, M4ind, orichain1, orichain2, chain1_nr, chain2_nr, min_delta, R2O, R2)
-                    interfaces.append((orichain1, orichain2, (X2, X2O), (Y2, Y2O), (R2, R2O)))
+                else:
+                    # print(len(interfaces)+1, "ADD", chain1, chain2, assembly, M3ind, M4ind, orichain1, orichain2, chain1_nr, chain2_nr, min_delta, R2O, R2)
+                    interfaces.append(
+                        (orichain1, orichain2, (X2, X2O), (Y2, Y2O), (R2, R2O))
+                    )
     return _arrayify_interfaces(interfaces)
+
 
 if __name__ == "__main__":
     import sys
@@ -430,34 +492,33 @@ if __name__ == "__main__":
     print(f"{len(interfaces)} interfaces detected", file=sys.stderr)
     np.save(outfile, interfaces)
     if len(sys.argv) > 4 and sys.argv[4].find("--write") > -1:
-        
+
         # Write out (relative) interfaces in PDB format
         for ifnr, interface in enumerate(interfaces):
             chain1, chain2, _, _, R = interface
-            #print(chain1, chain2)
-            rec_struc = struc[struc["chain"]==chain1]
-            lig_struc = struc[struc["chain"]==chain2]
+            # print(chain1, chain2)
+            rec_struc = struc[struc["chain"] == chain1]
+            lig_struc = struc[struc["chain"] == chain2]
             lig_coor00 = get_coor(lig_struc)
             lig_coor = lig_coor00.dot(R[0]) + R[1]
             lig_struc["x"] = lig_coor[:, 0]
             lig_struc["y"] = lig_coor[:, 1]
             lig_struc["z"] = lig_coor[:, 2]
             if chain1 == chain2:
-                lig_struc["chain"] = b'Z'
+                lig_struc["chain"] = b"Z"
             if_struc = np.concatenate((rec_struc, lig_struc), dtype=rec_struc.dtype)
             pdbdata = write_pdb(if_struc)
             with open(f"interface{ifnr+1}.pdb", "w") as f:
                 f.write(pdbdata)
-    
 
-        # Write out absolute interfaces in PDB format        
+        # Write out absolute interfaces in PDB format
         for ifnr, interface in enumerate(interfaces):
             chain1, chain2, X, Y, R = interface
-            rec_struc = struc[struc["chain"]==chain1]
-            lig_struc = struc[struc["chain"]==chain2]
+            rec_struc = struc[struc["chain"] == chain1]
+            lig_struc = struc[struc["chain"] == chain2]
 
             lig_coor00 = get_coor(lig_struc)
-            lig_coor = lig_coor00.dot(Y[0]) + Y[1]            
+            lig_coor = lig_coor00.dot(Y[0]) + Y[1]
             lig_struc["x"] = lig_coor[:, 0]
             lig_struc["y"] = lig_coor[:, 1]
             lig_struc["z"] = lig_coor[:, 2]
@@ -469,7 +530,7 @@ if __name__ == "__main__":
             rec_struc["z"] = rec_coor[:, 2]
 
             if chain1 == chain2:
-                lig_struc["chain"] = b'Z'
+                lig_struc["chain"] = b"Z"
             if_struc = np.concatenate((rec_struc, lig_struc), dtype=rec_struc.dtype)
             pdbdata = write_pdb(if_struc)
             with open(f"abs-interface{ifnr+1}.pdb", "w") as f:
