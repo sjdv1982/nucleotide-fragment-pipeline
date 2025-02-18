@@ -144,17 +144,20 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
         if ent_id not in poly_entity_types:
             continue
         curr_struc = struc[struc["chain"] == chain.encode()]
-        chain_struc[chain] = curr_struc
-        coor = get_coor(curr_struc)
-        chain_coors[chain] = coor
-        com = coor.mean(axis=0)
-        cen = coor - com
-        dis = np.linalg.norm(cen, axis=1)
-        radius = dis.max()
-        chain_ball[chain] = com, radius
-        struc_kd_tree = KDTree(coor)
-        struc_kd_trees[chain] = struc_kd_tree
-        struc_resids[chain] = curr_struc["resid"]
+        if not len(curr_struc):
+            chain_struc[chain] = []
+        else:
+            chain_struc[chain] = curr_struc
+            coor = get_coor(curr_struc)
+            chain_coors[chain] = coor
+            com = coor.mean(axis=0)
+            cen = coor - com
+            dis = np.linalg.norm(cen, axis=1)
+            radius = dis.max()
+            chain_ball[chain] = com, radius
+            struc_kd_tree = KDTree(coor)
+            struc_kd_trees[chain] = struc_kd_tree
+            struc_resids[chain] = curr_struc["resid"]
 
     def get_chain_identifiers(chain):
         if chain not in chain_identifiers:
@@ -173,6 +176,8 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
             continue
 
         atoms1 = chain_struc[chain1]
+        if not len(atoms1):
+            continue
         atom1_identifiers = get_chain_identifiers(chain1)
 
         for chain2_nr, chain2 in enumerate(struct_asym["id"]):
@@ -196,6 +201,8 @@ def detect_interfaces(struc: np.ndarray, header: dict) -> np.ndarray:
             if not is_copy:
                 continue
             atoms2 = chain_struc[chain2]
+            if not len(atoms2):
+                continue
             atom2_identifiers = get_chain_identifiers(chain2)
             common = set(atom1_identifiers.keys()).intersection(
                 set(atom2_identifiers.keys())
