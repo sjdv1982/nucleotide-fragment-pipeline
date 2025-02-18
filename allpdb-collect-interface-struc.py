@@ -4,13 +4,12 @@ from tqdm import tqdm
 
 import seamless
 
-seamless.delegate(level=2)
-interface_index, interface_data = Buffer.load("allpdb-filtered-interfaces").deserialize(
-    "mixed"
-)
+seamless.delegate(level=1)
+interface_index, interface_data = Buffer.load(
+    "allpdb-filtered-interfaces.mixed"
+).deserialize("mixed")
 struc_index = Buffer.load("allpdb-struc-index.json").deserialize("plain")
-allpdb_keyorder = Checksum.load("allpdb-keyorder.CHECKSUM")
-allpdb_keyorder = allpdb_keyorder.resolve("plain")
+allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
 
 all_keys = []
 for key in allpdb_keyorder:
@@ -37,5 +36,5 @@ for key_chunk in tqdm(key_chunks):
         result[key] = filtered_struc
 
 buf = Buffer(result, celltype="mixed")
-buf.save("allpdb-interface-struc")
-buf.checksum.save("allpdb-interface-struc.CHECKSUM")
+buf.save("intermediate/allpdb-interface-struc.mixed")
+buf.checksum.save("intermediate/allpdb-interface-struc.mixed.CHECKSUM")

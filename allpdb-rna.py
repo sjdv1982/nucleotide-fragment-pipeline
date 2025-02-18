@@ -2,10 +2,10 @@ from seamless import Buffer
 import numpy as np
 from tqdm import tqdm
 
-interface_index, interface_data = Buffer.load("allpdb-filtered-interfaces").deserialize(
-    "mixed"
-)
-strucs = Buffer.load("allpdb-interface-struc").deserialize("mixed")
+interface_index, interface_data = Buffer.load(
+    "allpdb-filtered-interfaces.mixed"
+).deserialize("mixed")
+strucs = Buffer.load("intermediate/allpdb-interface-struc.mixed").deserialize("mixed")
 
 rna_strucs = []
 rna_struc_index = {}
@@ -26,5 +26,5 @@ for code, struc0 in tqdm(strucs.items()):
 rna_strucs = np.concatenate(rna_strucs)
 allpdb_rna = rna_struc_index, rna_strucs
 buf = Buffer(allpdb_rna, celltype="mixed")
-buf.save("allpdb-rna")
-buf.checksum.save("allpdb-rna.CHECKSUM")
+buf.save("allpdb-rna.mixed")
+buf.get_checksum().save("allpdb-rna.mixed.CHECKSUM")

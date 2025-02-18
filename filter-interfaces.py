@@ -68,19 +68,14 @@ def filter_interfaces(interfaces, header):
     return result
 
 
-interfaces_index, interfaces_data = Buffer.load("allpdb-interfaces").deserialize(
-    "mixed"
-)
-headers = Buffer.load("allpdb-header-summarized").deserialize("plain")
+print("Load all interfaces")
+interfaces_index, interfaces_data = Buffer.load(
+    "intermediate/allpdb-interfaces.mixed"
+).deserialize("mixed")
+print("Load all headers...")
+headers = Buffer.load("intermediate/allpdb-header-summarized.json").deserialize("plain")
+print("..loaded")
 
-"""
-curr_header_summarized = Buffer.load("data/1b7f-summarized.json").deserialize("plain")
-r = interfaces_index["1b7f.cif"]
-curr_interfaces = interfaces_data[r[0]:r[0]+r[1]]
-
-result = filter_interfaces(curr_interfaces, curr_header_summarized)
-print(result)
-"""
 filtered_interfaces = []
 filtered_interfaces_index = {}
 offset = 0
@@ -107,5 +102,5 @@ if filtered_interfaces:
 allpdb_filtered_interfaces = (filtered_interfaces_index, filtered_interfaces)
 
 buf = Buffer(allpdb_filtered_interfaces, celltype="mixed")
-buf.save("allpdb-filtered-interfaces")
-buf.checksum.save("allpdb-filtered-interfaces.CHECKSUM")
+buf.save("allpdb-filtered-interfaces.mixed")
+buf.get_checksum().save("allpdb-filtered-interfaces.mixed.CHECKSUM")

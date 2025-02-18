@@ -134,5 +134,5 @@ if not any(
     allpdb_interfaces = (offsets, interfaces_concat)
 
     buf = Buffer(allpdb_interfaces, celltype="mixed")
-    buf.save("allpdb-interfaces.mixed")
-    buf.checksum.save("allpdb-interfaces.mixed.CHECKSUM")
+    buf.save("intermediate/allpdb-interfaces.mixed")
+    buf.get_checksum().save("intermediate/allpdb-interfaces.mixed.CHECKSUM")
