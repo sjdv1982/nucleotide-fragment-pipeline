@@ -26,7 +26,9 @@ import detect_interfaces
 from nefertiti.functions import superimpose
 
 allpdb_keyorder = Buffer.load("allpdb-keyorder.json").deserialize("plain")
-allpdb_headers = Buffer.load("intermediate/allpdb-header-summarized-asym.json").deserialize("plain")
+allpdb_headers = Buffer.load(
+    "intermediate/allpdb-header-summarized-asym.json"
+).deserialize("plain")
 allpdb_struc = Buffer.load("allpdb-struc-index.json").deserialize("plain")
 
 
@@ -53,7 +55,7 @@ detect_interfaces_chunk.modules.superimpose = superimpose
 
 seamless.delegate(level=SEAMLESS_DELEGATION_LEVEL, raise_exceptions=True)
 
-chunksize = 10
+chunksize = 30
 key_chunks = [
     allpdb_keyorder[n : n + chunksize]
     for n in range(0, len(allpdb_keyorder), chunksize)
