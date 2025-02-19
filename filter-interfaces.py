@@ -15,7 +15,7 @@ def minv(mat, offset):
     return result_mat, result_offset
 
 
-def filter_interfaces(interfaces, header):
+def filter_interfaces(interfaces, header, na_type):
     h = header
     chains_to_entities = {
         k: v for k, v in zip(h["struct_asym"]["id"], h["struct_asym"]["entity_id"])
@@ -28,7 +28,6 @@ def filter_interfaces(interfaces, header):
         eid: w for eid, w in zip(h["entity"]["id"], h["entity"]["formula_weight"])
     }
 
-    na_type = "polyribonucleotide"  # for DNA: 'polydeoxyribonucleotide'
     result = []
     for interface in interfaces:
         chain1, chain2 = interface["chain1"].decode(), interface["chain2"].decode()
@@ -76,6 +75,8 @@ print("Load all headers...")
 headers = Buffer.load("intermediate/allpdb-header-summarized.json").deserialize("plain")
 print("..loaded")
 
+na_type = "polyribonucleotide"  # for DNA: 'polydeoxyribonucleotide'
+
 filtered_interfaces = []
 filtered_interfaces_index = {}
 offset = 0
@@ -87,7 +88,7 @@ for code in tqdm(interfaces_index):
     if code not in headers:
         continue
     curr_header = headers[code]
-    ifaces = filter_interfaces(curr_interfaces, curr_header)
+    ifaces = filter_interfaces(curr_interfaces, curr_header, na_type=na_type)
     if not len(ifaces):
         continue
     filtered_interfaces_index[code] = (offset, len(ifaces))

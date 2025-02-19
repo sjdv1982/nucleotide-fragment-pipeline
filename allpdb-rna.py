@@ -26,5 +26,5 @@ for code, struc0 in tqdm(strucs.items()):
 rna_strucs = np.concatenate(rna_strucs)
 allpdb_rna = rna_struc_index, rna_strucs
 buf = Buffer(allpdb_rna, celltype="mixed")
-buf.save("allpdb-rna.mixed")
-buf.get_checksum().save("allpdb-rna.mixed.CHECKSUM")
+buf.save("intermediate/allpdb-rna.mixed")
+buf.get_checksum().save("intermediate/allpdb-rna.mixed.CHECKSUM")

@@ -1,3 +1,4 @@
+mkdir -p result
 cd data
 echo parse mmcif
 for i in *.cif; do  

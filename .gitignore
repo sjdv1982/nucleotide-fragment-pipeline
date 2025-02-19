@@ -1,3 +1,5 @@
+test/result
 config/
 intermediate/
 *.pyc
+*.FUTURE
