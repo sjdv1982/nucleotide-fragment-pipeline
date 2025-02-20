@@ -1,16 +1,22 @@
 import os
+import random
+from tqdm import tqdm
 import numpy as np
 from seamless import Buffer
-from nefertiti.functions.write_pdb import write_pdb
-from nefertiti.functions.parse_pdb import parse_pdb
+from write_pdb import write_pdb
+from parse_pdb import parse_pdb
 import subprocess
 
-rna_struc_index, rna_strucs_data = Buffer.load("allpdb-rna").deserialize("mixed")
+rna_struc_index, rna_strucs_data = Buffer.load(
+    "intermediate/allpdb-rna.mixed"
+).deserialize("mixed")
 
 new_rna_strucs = []
 new_rna_struc_index = {}
 offset = 0
-for code in rna_struc_index:
+keys = list(rna_struc_index.keys())
+random.shuffle(keys)
+for code in tqdm(keys):
     start, length = rna_struc_index[code]
     rna_struc = rna_strucs_data[start : start + length]
 
@@ -48,5 +54,5 @@ for code in rna_struc_index:
 new_rna_strucs = np.concatenate(new_rna_strucs)
 allpdb_rna_attract = new_rna_struc_index, new_rna_strucs
 buf = Buffer(allpdb_rna_attract, celltype="mixed")
-buf.save("allpdb-rna-attract")
-buf.checksum.save("allpdb-rna-attract.CHECKSUM")
+buf.save("intermediate/allpdb-rna-attract")
+buf.checksum.save("intermediate/allpdb-rna-attract.CHECKSUM")
