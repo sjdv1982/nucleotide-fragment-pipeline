@@ -1,5 +1,3 @@
-print("TODO: # Remove trinucleotides with inter-nucleotide clashes")
-
 import os
 import sys
 import itertools
@@ -14,9 +12,9 @@ def err(msg):
     exit(1)
 
 
-rna_struc_index, rna_strucs_data = Buffer.load("allpdb-rna-attract").deserialize(
-    "mixed"
-)
+rna_struc_index, rna_strucs_data = Buffer.load(
+    "intermediate/allpdb-rna-aareduce.mixed"
+).deserialize("mixed")
 
 bases = ("A", "C", "G", "U")
 trinuc_sequences = ["".join(s) for s in itertools.product(bases, repeat=3)]

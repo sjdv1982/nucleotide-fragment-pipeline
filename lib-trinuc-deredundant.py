@@ -9,7 +9,7 @@ from seamless import transformer
 
 import deredundant
 from deredundant import detect_pairs
-from cluster import cluster_from_pairs, write_clustering
+from clusterlib import cluster_from_pairs, write_clustering
 
 USE_SEAMLESS = True
 
