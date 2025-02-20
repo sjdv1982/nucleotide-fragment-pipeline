@@ -9,7 +9,7 @@ listf=intermediate/rna-pdbs/file.list
 rm -f $listf-*
 j=intermediate/rna-pdbs/jobfile
 
-split -l 200 $listf $listf-
+split -l $AAREDUCE_CHUNKSIZE $listf $listf-
 for chunkf in $listf-*; do
     rm -f $SEAMLESS_QUEUE_FILE
     rm -f $j
