@@ -5,10 +5,12 @@ lib-trinuc-*.txt
 lib-trinuc-*.npy
 lib-trinuc-*.clust
 lib-trinuc-*.json
+lib-trinuc-*.out
 lib-dinuc-*.txt
 lib-dinuc-*.npy
 lib-dinuc-*.clust
 lib-dinuc-*.json
+lib-dinuc-*.out
 build-library-dinuc-*.txt
 build-library-trinuc-*.txt
 library-fit-dinuc-*.txt
