@@ -53,6 +53,7 @@ def detect_pairs(struc, residuals, representatives, *, POOLSIZE):
     chunks_residuals = []
 
     for offset in range(0, len(struc), CHUNKSIZE):
+        # TODO: this gets out-of-memory errors if stuff hasn't been uploaded yet
         offsets.append(offset)
         chunk = struc[offset : offset + CHUNKSIZE]
         chunks.append(chunk)
@@ -106,8 +107,9 @@ def detect_pairs(struc, residuals, representatives, *, POOLSIZE):
                 )
                 return
             p1, p2 = processed_chunk.value
-            result1.append(p1)
-            result2.append(p2)
+            if p1 is not None and len(p1):
+                result1.append(p1)
+                result2.append(p2)
 
         with TransformationPool(POOLSIZE) as pool:
             pool.apply(detect_close_chunk, len(n1n2), callback=callback)
