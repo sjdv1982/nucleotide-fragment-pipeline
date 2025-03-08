@@ -33,7 +33,8 @@ def detect_close(struc1, struc2, representatives, threshold):
         sd = np.einsum("ijkl,ijkl->ij", d, d)
         close_mat0 = (sd < thresh).astype(bool)
         close_mat |= close_mat0
-    return np.where(close_mat)
+    p1, p2 = np.where(close_mat)
+    return p1, p2
 
 
 def verify_close(ind1, ind2, struc1, struc2, residuals1, residuals2, threshold):
